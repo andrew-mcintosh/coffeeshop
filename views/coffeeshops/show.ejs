@@ -1,0 +1,88 @@
+<% include ../partials/header %>
+
+<div class="container"> 
+    <div class="row flex-column-reverse flex-md-row">
+            <div class="col-md-3 map">
+                <div id="map"></div>
+                <hr>
+            </div>
+            <div class="col-md-9">
+                <div class="card mb-3">
+                      <img class="card-img-top" id="show-image" src="<%= coffeeshop.image %>" alt="<%= coffeeshop.name %>">
+                        <div class="card-body">
+                                <p class="float-right"><%= coffeeshop.address %></p>
+                            <h5 id="card-title-show"><%= coffeeshop.name %></h5>
+                            <hr>
+                            <p class="card-text"><%= coffeeshop.description %> </p>
+                            <p><em>Submitted by: <%= coffeeshop.author.username %>, <%= moment(coffeeshop.createdAt).fromNow() %></em></p>
+                            <% if(currentUser && coffeeshop.author.id.equals(currentUser._id)){ %>
+                                <a class="btn btn-warning btn-sm" href="/coffeeshops/<%=coffeeshop._id %>/edit">Edit</a>
+                                <form class="delete-form" action="/coffeeshops/<%=coffeeshop._id %>?_method=DELETE" method="POST">
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                              <% } %>
+                        </div>
+                </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-right">
+                        <a class="btn btn-success" href="/coffeeshops/<%=coffeeshop._id %>/comments/new">Add a comment</a>
+                    </div>
+                    <hr>
+                     <div class="row">
+                        <% coffeeshop.comments.forEach(function(comment){ %>
+                            <div class="col-md-12 mb-2">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="float-left">
+                                            <p class="card-title"></p><strong><%= comment.author.username %></strong></p>
+                                            <p class="card-text"></p><%= comment.text %></p>
+                                        </div>
+                                        <div class="float-right">
+                                            <p><%= moment(comment.createdAt).fromNow() %></p>
+                                            <a class="btn btn-warning btn-sm" href="/coffeeshops/<%=coffeeshop._id%>/comments/<%=comment._id%>/edit">Edit</a>
+                                            <form class="delete-form" action="/coffeeshops/<%=coffeeshop._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
+                                                <input type="submit" class="btn btn-danger btn-sm" value="Delete">
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>    
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  function initMap() {
+    var lat = 43.653908;
+    var lng = -79.384293	;
+    var center = {lat: lat, lng: lng };
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: center,
+        scrollwheel: false
+    });
+    var contentString = `
+      <strong><%= coffeeshop.name %><br />
+      <%= coffeeshop.location %></strong>
+      <p><%= coffeeshop.description %></p>
+    `
+    var infowindow = new google.maps.InfoWindow({
+      content: contentString
+    });
+    var marker = new google.maps.Marker({
+        position: center,
+        map: map
+    });
+    marker.addListener('click', function() {
+      infowindow.open(map, marker);
+    });
+  }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAQPgNhpLJgAXta7rJPfC9yBDKje2_V5Q&callback=initMap"></script>
+
+<% include ../partials/footer %>
